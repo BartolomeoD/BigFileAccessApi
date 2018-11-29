@@ -1,9 +1,10 @@
-﻿using BigFileAccessApi.Contracts;
+﻿using System.IO.MemoryMappedFiles;
+using BigFileAccessApi.Contracts;
 
 namespace BigFileAccessApi.Abstractions
 {
     public interface IIndexerService
     {
-        Chunk[] IndexFile(string path);
+        Chunk[] IndexFile(MemoryMappedFile  file);
     }
 }
