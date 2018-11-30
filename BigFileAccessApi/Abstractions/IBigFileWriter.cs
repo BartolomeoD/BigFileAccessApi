@@ -2,8 +2,8 @@
 {
     public interface IBigFileWriter
     {
-        void AddLine(int position, string value);
+        void AddLineAsync(int position, string value);
 
-        void AppendLine(string value);
+        void AppendLineAsync(string value);
     }
 }

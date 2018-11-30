@@ -8,7 +8,7 @@ namespace BigFileAccessApi.Services
 {
     public class BigFileReader : IBigFileReader
     {
-        private FileStream _fileReader;
+        private readonly FileStream _fileReader;
         public BigFileReader(IConfiguration appConfiguration)
         {
             _fileReader = File.OpenRead(appConfiguration["App:BigFilePath"]);
