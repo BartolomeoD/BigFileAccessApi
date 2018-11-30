@@ -51,7 +51,7 @@ namespace BigFileAccessApi.Services
                                 result.Add(new Line
                                 {
                                     Number = currentStringNumber,
-                                    Length = newLineOffset - currentStringOffset,
+                                    Length = (int) (newLineOffset - currentStringOffset),
                                     StartOffset = currentStringOffset
                                 });
                                 currentStringNumber++;

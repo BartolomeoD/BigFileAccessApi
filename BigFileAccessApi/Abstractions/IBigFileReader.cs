@@ -1,7 +1,10 @@
-﻿namespace BigFileAccessApi.Abstractions
+﻿using System.Threading.Tasks;
+using BigFileAccessApi.Contracts;
+
+namespace BigFileAccessApi.Abstractions
 {
     public interface IBigFileReader
     {
-        string ReadLine(int lineNumber);
+        Task<string> ReadLineAsync(Line line);
     }
 }
