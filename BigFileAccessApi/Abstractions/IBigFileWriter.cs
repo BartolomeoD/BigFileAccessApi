@@ -1,9 +1,11 @@
-﻿namespace BigFileAccessApi.Abstractions
+﻿using System.Threading.Tasks;
+
+namespace BigFileAccessApi.Abstractions
 {
     public interface IBigFileWriter
     {
-        void AddLineAsync(int position, string value);
+        Task AddLineAsync(int position, string value);
 
-        void AppendLineAsync(string value);
+        Task AppendLineAsync(string value);
     }
 }

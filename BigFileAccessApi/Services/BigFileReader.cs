@@ -2,16 +2,15 @@
 using System.Threading.Tasks;
 using BigFileAccessApi.Abstractions;
 using BigFileAccessApi.Contracts;
-using Microsoft.Extensions.Configuration;
 
 namespace BigFileAccessApi.Services
 {
     public class BigFileReader : IBigFileReader
     {
         private readonly FileStream _fileReader;
-        public BigFileReader(IConfiguration appConfiguration)
+        public BigFileReader(string filePath)
         {
-            _fileReader = File.OpenRead(appConfiguration["App:BigFilePath"]);
+            _fileReader = File.OpenRead(filePath);
         }
 
         public async Task<string> ReadLineAsync(Line line)
@@ -20,6 +19,11 @@ namespace BigFileAccessApi.Services
             var bytes = new byte[line.Length];
             await _fileReader.ReadAsync(bytes,0, line.Length);
             return System.Text.Encoding.UTF8.GetString(bytes);
+        }
+
+        public void Close()
+        {
+            _fileReader.Close();
         }
     }
 }
