@@ -10,16 +10,17 @@ namespace BigFileAccessApi.Services
         private readonly FileStream _fileStream;
         private const int DefaultBufferSize = 4096;
 
-        public BigFileWriter(string filePath)
+        public BigFileWriter(FileStream fileStream)
         {
-            _fileStream = File.Open(filePath,FileMode.Open);
+            _fileStream = fileStream;
         }
         
-        public async Task AddLineAsync(int position, string value)
+        public async Task AddLineAsync(long position, string value)
         {
-            Shift(position, value.Length);
+            var insertingValue = value + "\n";
+            Shift(position, insertingValue.Length);
             _fileStream.Seek(position, SeekOrigin.Begin);
-            var buffer = System.Text.Encoding.UTF8.GetBytes(value + "\n");
+            var buffer = System.Text.Encoding.UTF8.GetBytes(insertingValue);
             await _fileStream.WriteAsync(buffer);
         }
 
@@ -30,12 +31,34 @@ namespace BigFileAccessApi.Services
             await _fileStream.WriteAsync(buffer);
         }
 
+        public async Task DeleteLineAsync(long position, int length)
+        {
+            var readOffset = position + length + 1;
+            var writeOffset = position;
+            var buffer = new byte[DefaultBufferSize];
+            do
+            {
+                int bufferSize;
+                if (readOffset + DefaultBufferSize > _fileStream.Length)
+                    bufferSize = (int) (_fileStream.Length - readOffset);
+                else
+                    bufferSize = DefaultBufferSize;
+                _fileStream.Seek(readOffset, SeekOrigin.Begin);
+                await _fileStream.ReadAsync(buffer, 0, bufferSize);
+                _fileStream.Seek(writeOffset, SeekOrigin.Begin);
+                await _fileStream.WriteAsync(buffer, 0, bufferSize);
+                readOffset += bufferSize;
+                writeOffset += bufferSize;
+            } while (readOffset < _fileStream.Length);
+            _fileStream.SetLength(writeOffset);
+        }
+
         public void Close()
         {
             _fileStream.Close();
         }
 
-        public void Shift(long fromPosition, int offsetPosition)
+        private void Shift(long fromPosition, int offsetPosition)
         {
             var buffers = new Queue<byte[]>();
             var initialLength = _fileStream.Length;
@@ -57,18 +80,14 @@ namespace BigFileAccessApi.Services
                     readOffset += bufferSize;
                 }
 
-                if (readOffset > fromPosition + offsetPosition + 1)
+                if (readOffset > writeOffset || readOffset == initialLength)
                 {
                     _fileStream.Seek(writeOffset, SeekOrigin.Begin);
                     var writingBytes = buffers.Dequeue();
                     _fileStream.Write(writingBytes);
                     writeOffset += writingBytes.Length;
                 }
-
-                if (buffers.Count == 0)
-                    break;
-
-            } while (true);
+            } while (buffers.Count > 0);
         }
     }
 }

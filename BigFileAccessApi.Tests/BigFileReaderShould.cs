@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using BigFileAccessApi.Contracts;
 using BigFileAccessApi.Services;
 using FluentAssertions;
@@ -13,7 +14,7 @@ namespace BigFileAccessApi.Tests
         [SetUp]
         public void SetUp()
         {
-            _reader = new BigFileReader("default.txt");
+            _reader = new BigFileReader(new FileStream("default.txt", FileMode.Open));
         }
 
         [Test]
@@ -21,7 +22,7 @@ namespace BigFileAccessApi.Tests
         {
             var line = new Line
             {
-                StartOffset = 7,
+                StartOffset = 6,
                 Length = 3
             };
             var str = await _reader.ReadLineAsync(line);

@@ -16,7 +16,7 @@ namespace BigFileAccessApi.Tests.Performance
         public void OpenBigFile()
         {
             File.Copy("default.txt", "big_file_test.txt");
-            _writer = new BigFileWriter("big_file_test.txt");
+            _writer = new BigFileWriter(new FileStream("big_file_test.txt", FileMode.Open));
         }
 
         [Test]

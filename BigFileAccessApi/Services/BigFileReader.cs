@@ -8,9 +8,9 @@ namespace BigFileAccessApi.Services
     public class BigFileReader : IBigFileReader
     {
         private readonly FileStream _fileReader;
-        public BigFileReader(string filePath)
+        public BigFileReader(FileStream fileStream)
         {
-            _fileReader = File.OpenRead(filePath);
+            _fileReader = fileStream;
         }
 
         public async Task<string> ReadLineAsync(Line line)

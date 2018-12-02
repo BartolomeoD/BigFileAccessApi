@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using BigFileAccessApi.Contracts;
 using BigFileAccessApi.Services;
@@ -14,7 +15,7 @@ namespace BigFileAccessApi.Tests.Performance
         [SetUp]
         public void SetUp()
         {
-            _reader = new BigFileReader("default.txt");
+            _reader = new BigFileReader(new FileStream("default.txt", FileMode.Open));
         }
 
         [Test]

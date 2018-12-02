@@ -29,5 +29,12 @@ namespace BigFileAccessApi.Abstractions
         /// <param name="lineNumber"></param>
         /// <returns></returns>
         Line GetLine(int lineNumber);
+
+        /// <summary>
+        /// удалить строку из индекса
+        /// </summary>
+        /// <param name="lineNumber"></param>
+        /// <param name="lineLength"></param>
+        void DeleteLine(int lineNumber, int lineLength);
     }
 }

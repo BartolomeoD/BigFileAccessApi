@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using BigFileAccessApi.Services;
+﻿using BigFileAccessApi.Services;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -14,7 +12,7 @@ namespace BigFileAccessApi.Tests
         [SetUp]
         public void IndexDefaultFile()
         {
-            _indexer = new IndexerService(100);
+            _indexer = new IndexerService(3);
             _indexer.IndexFile(@"default.txt");
         }
 
@@ -36,6 +34,8 @@ namespace BigFileAccessApi.Tests
         public void GetLine()
         {
             _indexer.GetLine(0).Length.Should().Be(5);
+            _indexer.GetLine(1).Length.Should().Be(3);
+            _indexer.GetLine(2).Length.Should().Be(3);
         }
     }
 }

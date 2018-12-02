@@ -9,23 +9,32 @@ namespace BigFileAccessApi.Services
     public class IndexerService : IIndexerService
     {
         private readonly int _defaultBufferSize;
-        private readonly List<Line> indexedLines;
+        private readonly List<Line> _indexedLines;
 
         public IndexerService(int indexDefaultBufferSize)
         {
             _defaultBufferSize = indexDefaultBufferSize;
-            indexedLines = new List<Line>();
+            _indexedLines = new List<Line>();
         }
 
         public Line GetLine(int lineNumber)
         {
-            return indexedLines[lineNumber];
+            return _indexedLines[lineNumber];
+        }
+
+        public void DeleteLine(int lineNumber, int lineLength)
+        {
+            _indexedLines.RemoveAt(lineNumber);
+            for (var i = lineNumber; i < _indexedLines.Count; i++)
+            {
+                _indexedLines[i].StartOffset -= lineLength + 1;
+            }
         }
 
         public void AppendLine(int lineLength)
         {
-            var last = indexedLines[indexedLines.Count - 1];
-            indexedLines.Add(new Line
+            var last = _indexedLines[_indexedLines.Count - 1];
+            _indexedLines.Add(new Line
             {
                 Length = lineLength,
                 StartOffset = last.StartOffset + last.Length + 1
@@ -34,21 +43,25 @@ namespace BigFileAccessApi.Services
 
         public void AddLine(int lineNumber, int lineLength)
         {
-            var preview = indexedLines[lineNumber - 1];
+            var current = _indexedLines[lineNumber];
 
-
-            indexedLines.Insert(lineNumber, new Line
+            _indexedLines.Insert(lineNumber, new Line
             {
-                StartOffset = preview.StartOffset + preview.Length + 1,
+                StartOffset = current.StartOffset,
                 Length = lineLength
             });
+
+            for (var i = lineNumber + 1; i < _indexedLines.Count; i++)
+            {
+                _indexedLines[i].StartOffset += lineLength + 1;
+            }
         }
 
         public void IndexFile(string path)
         {
             var buffer = new byte[_defaultBufferSize];
             var offset = 0;
-            long currentStringOffset = 0;
+            long prevNewLineOffset =  -1;
             long newLineOffset = 0;
             var fileLength = new FileInfo(path).Length;
             using (var file = MemoryMappedFile.CreateFromFile(path))
@@ -63,28 +76,21 @@ namespace BigFileAccessApi.Services
                         else
                             bufferSize = _defaultBufferSize;
                         accessor.ReadArray(offset, buffer, 0, bufferSize);
-                        offset += bufferSize;
-                        var prevNewLineOffset = 0;
-                        var found = false;
                         for (var i = 0; i < bufferSize; i++)
                         {
                             var a = (char) buffer[i];
                             if (buffer[i] == (byte) '\n')
                             {
-                                found = true;
-                                newLineOffset += i - prevNewLineOffset;
-                                indexedLines.Add(new Line
+                                newLineOffset =  offset + i;
+                                _indexedLines.Add(new Line
                                 {
-                                    Length = (int) (newLineOffset - currentStringOffset - 1),
-                                    StartOffset = currentStringOffset
+                                    Length = (int) (newLineOffset - prevNewLineOffset - 1),
+                                    StartOffset = prevNewLineOffset + 1
                                 });
-                                currentStringOffset = newLineOffset + 1;
-                                prevNewLineOffset = i;
+                                prevNewLineOffset = newLineOffset;
                             }
                         }
-
-                        if (!found)
-                            newLineOffset += bufferSize;
+                        offset += bufferSize;
                     } while (offset < fileLength);
                 }
             }
